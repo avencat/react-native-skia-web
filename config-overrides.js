@@ -6,8 +6,19 @@ const {
 } = require('customize-cra');
 
 const {DefinePlugin} = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
+const NodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin');
+
+const polyfillFS = (config) => {
+  config.resolve.fallback = {
+    fs: false
+  }
+
+  return config
+}
 
 module.exports = override(
+  polyfillFS,
   ...addBabelPlugins('babel-plugin-react-native-web'),
   ...addExternalBabelPlugins(
     'react-native-web',
@@ -34,4 +45,18 @@ module.exports = override(
       __DEV__: process.env.NODE_ENV !== 'production',
     }),
   ),
+  addWebpackPlugin(
+    // 1. Make the wasm file available to the build system
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
+        },
+      ],
+    }),
+  ),
+  addWebpackPlugin(
+    // 2. Polyfill path module from node
+    new NodePolyfillWebpackPlugin({ includeAliases: ['path'] })
+  )
 );

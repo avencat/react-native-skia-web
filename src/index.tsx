@@ -3,6 +3,11 @@
  */
 import 'react-native-gesture-handler';
 import {createRoot} from 'react-dom/client';
+// Notice the import path `@shopify/react-native-skia/lib/module/web`
+// This is important only to pull the code responsible for loading Skia.
+// @ts-expect-error
+import {LoadSkiaWeb} from '@shopify/react-native-skia/lib/module/web';
+
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
@@ -11,7 +16,9 @@ import './icons';
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement!);
-root.render(<App />);
+LoadSkiaWeb().then(async () => {
+  root.render(<App />);
+});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
